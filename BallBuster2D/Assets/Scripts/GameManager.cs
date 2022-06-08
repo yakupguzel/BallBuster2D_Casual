@@ -13,6 +13,9 @@ public class GameManager : MonoBehaviour
     int remainingBallCount;
     int ballPoolIndex;
 
+    [Header("Bomb Object")]
+    [SerializeField] private ParticleSystem bombExplosionEffect;
+
     [Header("Ball Throw Mechanism")]
     [SerializeField] private GameObject ballThrower;
     [SerializeField] private GameObject ballSpawnPosition;
@@ -117,5 +120,12 @@ public class GameManager : MonoBehaviour
             loadNextBall = false;
             Invoke("LoadNextBall", .3f);
         }
+    }
+
+    public void BombExplosionEffect(Vector2 bombPosition)
+    {
+        bombExplosionEffect.gameObject.transform.position = bombPosition;
+        bombExplosionEffect.gameObject.SetActive(true);
+        bombExplosionEffect.Play();
     }
 }
