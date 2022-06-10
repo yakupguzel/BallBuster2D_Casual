@@ -13,8 +13,11 @@ public class GameManager : MonoBehaviour
     int remainingBallCount;
     int ballPoolIndex;
 
-    [Header("Bomb Object")]
+    [Header("Bomb Explosion Effect")]
     [SerializeField] private ParticleSystem bombExplosionEffect;
+    [Header("Box Explosion Effect")]
+    [SerializeField] private ParticleSystem[] boxExplosionEffects;
+    int boxExplosionEffectIndex = 0;
 
     [Header("Ball Throw Mechanism")]
     [SerializeField] private GameObject ballThrower;
@@ -127,5 +130,19 @@ public class GameManager : MonoBehaviour
         bombExplosionEffect.gameObject.transform.position = bombPosition;
         bombExplosionEffect.gameObject.SetActive(true);
         bombExplosionEffect.Play();
+    }
+
+    public void BoxExplosionEffect(Vector2 boxPosition)
+    {
+        boxExplosionEffects[boxExplosionEffectIndex].gameObject.transform.position = boxPosition;
+        boxExplosionEffects[boxExplosionEffectIndex].gameObject.SetActive(true);
+        boxExplosionEffects[boxExplosionEffectIndex].Play();
+
+
+        if (boxExplosionEffectIndex == boxExplosionEffects.Length - 1)
+
+            boxExplosionEffectIndex = 0;
+        else
+            boxExplosionEffectIndex++;
     }
 }

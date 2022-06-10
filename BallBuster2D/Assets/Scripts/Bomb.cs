@@ -34,10 +34,20 @@ public class Bomb : MonoBehaviour
 
         foreach (var coll in colliders)
         {
-            coll.gameObject.GetComponent<Rigidbody2D>().AddForce(
-                90 * new Vector2(UnityEngine.Random.Range(0f,3f), UnityEngine.Random.Range(6f,14f)),
-                ForceMode2D.Force
-                );
+            if (coll.gameObject.CompareTag("Box"))
+            {
+                coll.GetComponent<Box>().PlayExplosionEffect();
+            }
+            else
+            {
+                coll.gameObject.GetComponent<Rigidbody2D>().AddForce(
+               90 * new Vector2(UnityEngine.Random.Range(0f, 3f), UnityEngine.Random.Range(6f, 14f)),
+               ForceMode2D.Force
+               );
+            }
+
+
+           
         }
     }
 }

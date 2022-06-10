@@ -16,6 +16,8 @@ TagManager:
   - 1024
   - 2048
   - Ground
+  - FxTemporaire
+  - Box
   layers:
   - Default
   - TransparentFX
