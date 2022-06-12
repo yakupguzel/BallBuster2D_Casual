@@ -18,6 +18,7 @@ TagManager:
   - Ground
   - FxTemporaire
   - Box
+  - AudioManager
   layers:
   - Default
   - TransparentFX

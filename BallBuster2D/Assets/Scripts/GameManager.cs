@@ -1,11 +1,11 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("Level Settings")]
+    [Header("---- Level Settings")]
     public Sprite[] ballSpritesList;
     [SerializeField] private GameObject[] balls;
     [SerializeField] private TextMeshProUGUI remainingBallText;
@@ -13,20 +13,40 @@ public class GameManager : MonoBehaviour
     int remainingBallCount;
     int ballPoolIndex;
 
-    [Header("Bomb Explosion Effect")]
+    [Header("---- Bomb Explosion Effect")]
     [SerializeField] private ParticleSystem bombExplosionEffect;
-    [Header("Box Explosion Effect")]
+    [Header("---- Box Explosion Effect")]
     [SerializeField] private ParticleSystem[] boxExplosionEffects;
     int boxExplosionEffectIndex = 0;
 
-    [Header("Ball Throw Mechanism")]
+    [Header("---- Ball Throw Mechanism")]
     [SerializeField] private GameObject ballThrower;
     [SerializeField] private GameObject ballSpawnPosition;
     [SerializeField] private GameObject nextBallPosition;
+
+    [Header("---- Mission Settings")]
+    [SerializeField] private RectTransform missionArea;
+    [SerializeField] private List<TargetUI> targetsUI;
+    [SerializeField] private List<Target> targets;
+
+    int targetBallValue, targetBoxValue;
+    internal bool hasTargetBall;
+    bool hasTargetBox;
+    Image ballTargetComplated, boxTargetComplated;
+
+
     GameObject chosenBall;
+
+    AudioManager audioManager;
 
     bool loadNextBall = false;
     bool onFirstAttempt = false;
+
+    
+    private void Awake()
+    {
+        audioManager = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
+    }
 
     private void Start()
     {
@@ -34,7 +54,44 @@ public class GameManager : MonoBehaviour
         remainingBallText.text = remainingBallCount.ToString();
         onFirstAttempt = true;
         LoadNextBall();
+        InitializeMissions();
     }
+
+    private void InitializeMissions()
+    {
+        if (targets.Count > 0)
+        {
+            missionArea.sizeDelta = new Vector2(missionArea.sizeDelta.x * targets.Count, missionArea.sizeDelta.y);
+
+            for (int i = 0; i < targets.Count; i++)
+            {
+                targetsUI[i].targetImage.sprite = targets[i].targetSprite;
+                targetsUI[i].targetValueText.text = targets[i].targetValue.ToString();
+                targetsUI[i].missionComplateImage.sprite = targets[i].missionComplateImage;
+
+                if (targets[i].targetType == TargetTypes.Ball)
+                {
+                    hasTargetBall = true;
+                    targetBallValue = targets[i].targetValue;
+                    ballTargetComplated = targetsUI[i].missionComplateImage;
+                }
+                else if (targets[i].targetType == TargetTypes.Box)
+                {
+                    hasTargetBox = true;
+                    targetBoxValue = targets[i].targetValue;
+                    boxTargetComplated = targetsUI[i].missionComplateImage;
+                }
+
+            }
+        }
+        else
+        {
+            missionArea.gameObject.SetActive(false);
+        }
+
+
+    }
+
 
     private void Update()
     {
@@ -113,6 +170,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetMouseButtonUp(0))
         {
             chosenBall.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+            audioManager.PlayBallThrowSound();
             chosenBall.transform.SetParent(null);
             chosenBall.GetComponent<Ball>().ChangePrimeryState();
             loadNextBall = true;
@@ -129,14 +187,28 @@ public class GameManager : MonoBehaviour
     {
         bombExplosionEffect.gameObject.transform.position = bombPosition;
         bombExplosionEffect.gameObject.SetActive(true);
+        audioManager.PlayBombExplosionSound();
         bombExplosionEffect.Play();
+
+
     }
 
     public void BoxExplosionEffect(Vector2 boxPosition)
     {
         boxExplosionEffects[boxExplosionEffectIndex].gameObject.transform.position = boxPosition;
         boxExplosionEffects[boxExplosionEffectIndex].gameObject.SetActive(true);
+        audioManager.PlayBoxExplosionSound();
         boxExplosionEffects[boxExplosionEffectIndex].Play();
+
+        if (hasTargetBox)
+        {
+            targetBoxValue--;
+            if (targetBoxValue == 0)
+            {
+                boxTargetComplated.gameObject.SetActive(true);
+                // Play complated audio
+            }
+        }
 
 
         if (boxExplosionEffectIndex == boxExplosionEffects.Length - 1)
@@ -144,5 +216,13 @@ public class GameManager : MonoBehaviour
             boxExplosionEffectIndex = 0;
         else
             boxExplosionEffectIndex++;
+    }
+
+    internal void CheckBallTargetCount(int ballValue)
+    {
+        if (targetBallValue==ballValue)
+        {
+            ballTargetComplated.gameObject.SetActive(true);
+        }
     }
 }

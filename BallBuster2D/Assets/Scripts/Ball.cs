@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
@@ -11,12 +9,16 @@ public class Ball : MonoBehaviour
     [SerializeField] ParticleSystem mergeEffect;
     [SerializeField] SpriteRenderer spriteRenderer;
 
+    [SerializeField] private bool isDefaultBall;
+
     bool primery;
 
     private void Start()
     {
 
         numberText.text = number.ToString();
+        if (isDefaultBall)
+            primery = true;
     }
 
     void SetBallState()
@@ -126,6 +128,11 @@ public class Ball : MonoBehaviour
                     break;
                 default:
                     break;
+            }
+
+            if (gameManager.hasTargetBall)
+            {
+                gameManager.CheckBallTargetCount(number);
             }
 
             primery = false;
