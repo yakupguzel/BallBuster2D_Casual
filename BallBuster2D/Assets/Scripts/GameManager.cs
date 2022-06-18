@@ -29,11 +29,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<TargetUI> targetsUI;
     [SerializeField] private List<Target> targets;
 
-    int targetBallValue, targetBoxValue;
+    [Header("---- Win Game Panel")]
+    [SerializeField] private GameObject winGamePanel;
+
+
+    int targetBallValue, targetBoxValue, targetCount;
     internal bool hasTargetBall;
     bool hasTargetBox;
     Image ballTargetComplated, boxTargetComplated;
 
+    private bool isGamePlay;
 
     GameObject chosenBall;
 
@@ -42,7 +47,7 @@ public class GameManager : MonoBehaviour
     bool loadNextBall = false;
     bool onFirstAttempt = false;
 
-    
+
     private void Awake()
     {
         audioManager = GameObject.FindGameObjectWithTag("AudioManager").GetComponent<AudioManager>();
@@ -55,6 +60,7 @@ public class GameManager : MonoBehaviour
         onFirstAttempt = true;
         LoadNextBall();
         InitializeMissions();
+        isGamePlay = true;
     }
 
     private void InitializeMissions()
@@ -72,12 +78,14 @@ public class GameManager : MonoBehaviour
                 if (targets[i].targetType == TargetTypes.Ball)
                 {
                     hasTargetBall = true;
+                    targetCount++;
                     targetBallValue = targets[i].targetValue;
                     ballTargetComplated = targetsUI[i].missionComplateImage;
                 }
                 else if (targets[i].targetType == TargetTypes.Box)
                 {
                     hasTargetBox = true;
+                    targetCount++;
                     targetBoxValue = targets[i].targetValue;
                     boxTargetComplated = targetsUI[i].missionComplateImage;
                 }
@@ -96,6 +104,16 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         MoveBallThrower();
+    }
+
+
+    private void CheckAllTargetComplated()
+    {
+        if (targetCount == 0)
+        {
+            isGamePlay = false;
+            winGamePanel.SetActive(true);
+        }
     }
 
     void LoadNextBall()
@@ -149,37 +167,40 @@ public class GameManager : MonoBehaviour
 
     private void MoveBallThrower()
     {
-        if (Input.GetMouseButton(0))
+        if (isGamePlay)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
-
-            if (hit.collider != null)
+            if (Input.GetMouseButton(0))
             {
-                if (hit.collider.gameObject.CompareTag("Ground"))
-                {
-                    Vector2 myMousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
 
-                    ballThrower.transform.position = Vector2.MoveTowards(ballThrower.transform.position, new Vector2(myMousePosition.x, ballThrower.transform.position.y), 30 * Time.deltaTime);
+                if (hit.collider != null)
+                {
+                    if (hit.collider.gameObject.CompareTag("Ground"))
+                    {
+                        Vector2 myMousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+                        ballThrower.transform.position = Vector2.MoveTowards(ballThrower.transform.position, new Vector2(myMousePosition.x, ballThrower.transform.position.y), 30 * Time.deltaTime);
+                    }
                 }
+
+
             }
 
+            if (Input.GetMouseButtonUp(0))
+            {
+                chosenBall.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+                audioManager.PlayBallThrowSound();
+                chosenBall.transform.SetParent(null);
+                chosenBall.GetComponent<Ball>().ChangePrimeryState();
+                loadNextBall = true;
+            }
 
-        }
-
-        if (Input.GetMouseButtonUp(0))
-        {
-            chosenBall.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
-            audioManager.PlayBallThrowSound();
-            chosenBall.transform.SetParent(null);
-            chosenBall.GetComponent<Ball>().ChangePrimeryState();
-            loadNextBall = true;
-        }
-
-        if (loadNextBall)
-        {
-            loadNextBall = false;
-            Invoke("LoadNextBall", .3f);
+            if (loadNextBall)
+            {
+                loadNextBall = false;
+                Invoke("LoadNextBall", .3f);
+            }
         }
     }
 
@@ -206,7 +227,10 @@ public class GameManager : MonoBehaviour
             if (targetBoxValue == 0)
             {
                 boxTargetComplated.gameObject.SetActive(true);
+                targetCount--;
+                CheckAllTargetComplated();
                 // Play complated audio
+                audioManager.PlayMissionCompalteSound();
             }
         }
 
@@ -220,9 +244,12 @@ public class GameManager : MonoBehaviour
 
     internal void CheckBallTargetCount(int ballValue)
     {
-        if (targetBallValue==ballValue)
+        if (targetBallValue == ballValue)
         {
             ballTargetComplated.gameObject.SetActive(true);
+            targetCount--;
+            CheckAllTargetComplated();
+            audioManager.PlayMissionCompalteSound();
         }
     }
 }

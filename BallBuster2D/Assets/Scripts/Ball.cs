@@ -33,57 +33,14 @@ public class Ball : MonoBehaviour
 
     private void OnCollisionStay2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag(number.ToString()) && primery)
-        {
-            mergeEffect.Play();
-            collision.gameObject.SetActive(false);
-            number += number;
-            gameObject.tag = number.ToString();
-            numberText.text = number.ToString();
-
-            //Switching ball sprite
-
-            switch (number)
-            {
-                case 2:
-                    spriteRenderer.sprite = gameManager.ballSpritesList[0];
-                    break;
-                case 4:
-                    spriteRenderer.sprite = gameManager.ballSpritesList[1];
-                    break;
-                case 8:
-                    spriteRenderer.sprite = gameManager.ballSpritesList[2];
-                    break;
-                case 16:
-                    spriteRenderer.sprite = gameManager.ballSpritesList[3];
-                    break;
-                case 32:
-                    spriteRenderer.sprite = gameManager.ballSpritesList[4];
-                    break;
-                case 64:
-                    spriteRenderer.sprite = gameManager.ballSpritesList[5];
-                    break;
-                case 128:
-                    spriteRenderer.sprite = gameManager.ballSpritesList[6];
-                    break;
-                case 256:
-                    spriteRenderer.sprite = gameManager.ballSpritesList[7];
-                    break;
-                case 512:
-                case 1024:
-                case 2048:
-                    spriteRenderer.sprite = gameManager.ballSpritesList[8];
-                    break;
-                default:
-                    break;
-            }
-
-            primery = false;
-
-            ChangePrimeryState();
-        }
+        CheckBallCollision2D(collision);
     }
     private void OnCollisionEnter2D(Collision2D collision)
+    {
+        CheckBallCollision2D(collision);
+    }
+
+    private void CheckBallCollision2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag(number.ToString()) && primery)
         {
@@ -129,6 +86,7 @@ public class Ball : MonoBehaviour
                 default:
                     break;
             }
+
 
             if (gameManager.hasTargetBall)
             {

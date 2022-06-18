@@ -7,6 +7,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioSource bombExplosionSound;
     [SerializeField] private AudioSource boxExplosionSound;
     [SerializeField] private AudioSource ballThrowSound;
+    [SerializeField] private AudioSource missionComplateSound;
 
 
 
@@ -27,5 +28,11 @@ public class AudioManager : MonoBehaviour
     {
         ballThrowSound.Stop();
         ballThrowSound.Play();
+    }
+    
+    public void PlayMissionCompalteSound()
+    {
+        missionComplateSound.Stop();
+        missionComplateSound.Play();
     }
 }
